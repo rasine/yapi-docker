@@ -1,0 +1,46 @@
+# Use root/example as user/password credentials
+version: '3'
+
+services:
+  mongo:
+    image: mongo:4
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+      MONGO_INITDB_DATABASE: yapi
+    volumes:
+      - ./config/mongo-conf:/docker-entrypoint-initdb.d
+      - ./data/mongo/data/db:/data/db
+    ports:
+      - 27016:27017
+    networks:
+      - yapi_backend
+
+  yapi-web:
+    image: jayfong/yapi:latest
+    container_name: yapi-web
+    ports:
+      - 3000:3000
+    environment:
+      - YAPI_ADMIN_ACCOUNT=956378949@qq.com
+      - YAPI_ADMIN_PASSWORD=ymfe.org
+      - YAPI_CLOSE_REGISTER=true
+      - YAPI_DB_SERVERNAME=mongo
+      - YAPI_DB_PORT=27017
+      - YAPI_DB_DATABASE=yapi
+      - YAPI_DB_USER=yapi
+      - YAPI_DB_PASS=yapi.123456
+      - YAPI_MAIL_ENABLE=false
+      - YAPI_LDAP_LOGIN_ENABLE=false
+      - YAPI_PLUGINS=[]
+    depends_on:
+      - mongo
+    links:
+      - mongo
+    restart: unless-stopped
+    networks:
+      - yapi_backend
+
+networks:
+  yapi_backend:
